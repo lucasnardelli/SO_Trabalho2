@@ -55,6 +55,17 @@ int fifo(int8_t** page_table, int num_pages, int prev_page,
 
 int second_chance(int8_t** page_table, int num_pages, int prev_page,
                   int fifo_frm, int num_frames, int clock) {
+    int i = 0;
+    while (i<num_pages){
+        if(fifo_frm == page_table[i][PT_FRAMEID]){
+            if(page_table[i][PT_REFERENCE_BIT] == 0){
+                return i;
+            }else{
+                page_table[i][PT_REFERENCE_BIT] = 0;
+            }
+        }
+        i = (i + 1) % num_pages;
+    }
     return -1;
 }
 
