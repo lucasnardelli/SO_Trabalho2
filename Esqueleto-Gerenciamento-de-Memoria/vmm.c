@@ -44,10 +44,11 @@ typedef struct {
 
 int fifo(int8_t** page_table, int num_pages, int prev_page,
          int fifo_frm, int num_frames, int clock) {
-    int i = 0;
+    int i;
     while (i<num_pages){
-        if(fifo_frm == page_table[i][PT_FRAMEID])
+        if(fifo_frm == page_table[i][PT_FRAMEID]){
             return i;
+        } 
         i++;
     }
     return -1;
@@ -69,13 +70,35 @@ int second_chance(int8_t** page_table, int num_pages, int prev_page,
     return -1;
 }
 
+int percorrer_paginas(int8_t** page_table, int num_pages, int R, int M){
+    int i;
+    for(i=0 ; i<num_pages ; i++){
+        if(page_table[i][PT_REFERENCE_BIT] == R && page_table[i][PT_DIRTY] == M && page_table[i][PT_MAPPED] == 1){ // Classe 0
+            return i;
+        }
+    }
+    return -1;
+}
+
 int nru(int8_t** page_table, int num_pages, int prev_page,
         int fifo_frm, int num_frames, int clock) {
-    return -1;
+    int i = -1;
+    i = percorrer_paginas(page_table, num_pages, 0, 0);
+    if(i != -1)
+        return i;
+    i = percorrer_paginas(page_table, num_pages, 0, 1);
+    if(i != -1)
+        return i;
+    i = percorrer_paginas(page_table, num_pages, 1, 0);
+    if(i != -1)
+        return i;
+    i = percorrer_paginas(page_table, num_pages, 1, 1);
+    return i;
 }
 
 int aging(int8_t** page_table, int num_pages, int prev_page,
           int fifo_frm, int num_frames, int clock) {
+            
     return -1;
 }
 
