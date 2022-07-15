@@ -146,7 +146,7 @@ int find_next_frame(int *physical_memory, int *num_free_frames,
 int simulate(int8_t **page_table, int num_pages, int *prev_page, int *fifo_frm,
              int *physical_memory, int *num_free_frames, int num_frames,
              int *prev_free, int virt_addr, char access_type,
-             eviction_f evict, int clock) {
+             eviction_f evict, int clock, int cont) {
     if (virt_addr >= num_pages || virt_addr < 0) {
         printf("Invalid access \n");
         exit(1);
@@ -196,10 +196,14 @@ int simulate(int8_t **page_table, int num_pages, int *prev_page, int *fifo_frm,
     if (clock == 1) {
         for (int i = 0; i < num_pages; i++){
             if(page_table[i][PT_REFERENCE_BIT] == 1){
-                page_table[i][PT_AGING_COUNTER] ++;
+                int pot=1;
+                for(int x=0 ; x<cont ; x++){
+                    pot = pot * 2;
+                }
+                page_table[i][PT_AGING_COUNTER] += pot;
             }
             page_table[i][PT_REFERENCE_BIT] = 0;
-        }      
+        }   
     }
     return 1; // Page Fault!
 }
@@ -212,14 +216,16 @@ void run(int8_t **page_table, int num_pages, int *prev_page, int *fifo_frm,
     int i = 0;
     int clock = 0;
     int faults = 0;
+    int cont = 0;
     while (scanf("%d", &virt_addr) == 1) {
         getchar();
         scanf("%c", &access_type);
         clock = ((i+1) % clock_freq) == 0;
         faults += simulate(page_table, num_pages, prev_page, fifo_frm,
                            physical_memory, num_free_frames, num_frames, prev_free,
-                           virt_addr, access_type, evict, clock);
+                           virt_addr, access_type, evict, clock, cont);
         i++;
+        cont ++;
     }
     printf("%d\n", faults);
 }
