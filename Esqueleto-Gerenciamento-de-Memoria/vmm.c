@@ -98,8 +98,19 @@ int nru(int8_t** page_table, int num_pages, int prev_page,
 
 int aging(int8_t** page_table, int num_pages, int prev_page,
           int fifo_frm, int num_frames, int clock) {
-            
-    return -1;
+    int i, aux, page,j;
+    for(i=0 ; i<num_pages ; i++){
+        if(page_table[i][PT_MAPPED] == 1){
+            page = i;
+            break;
+        }
+    }
+    for(aux=i ; aux<num_pages ; aux++){
+        if(page_table[aux][PT_MAPPED] == 1 && page_table[aux][PT_AGING_COUNTER] < page_table[page][PT_AGING_COUNTER]){
+            page = aux;
+        }           
+    }
+    return page;
 }
 
 int mfu(int8_t** page_table, int num_pages, int prev_page,
@@ -140,7 +151,6 @@ int simulate(int8_t **page_table, int num_pages, int *prev_page, int *fifo_frm,
         printf("Invalid access \n");
         exit(1);
     }
-
     if (page_table[virt_addr][PT_MAPPED] == 1) {
         page_table[virt_addr][PT_REFERENCE_BIT] = 1;
         return 0; // Not Page Fault!
@@ -169,7 +179,7 @@ int simulate(int8_t **page_table, int num_pages, int *prev_page, int *fifo_frm,
         page_table[to_free][PT_DIRTY] = 0;
         page_table[to_free][PT_REFERENCE_BIT] = 0;
         page_table[to_free][PT_REFERENCE_MODE] = 0;
-        page_table[to_free][PT_AGING_COUNTER] = 0;
+        //page_table[to_free][PT_AGING_COUNTER] = 0;
     }
 
     // Coloca endereço físico na tabela de páginas!
@@ -184,10 +194,13 @@ int simulate(int8_t **page_table, int num_pages, int *prev_page, int *fifo_frm,
     *prev_page = virt_addr;
 
     if (clock == 1) {
-        for (int i = 0; i < num_pages; i++)
+        for (int i = 0; i < num_pages; i++){
+            if(page_table[i][PT_REFERENCE_BIT] == 1){
+                page_table[i][PT_AGING_COUNTER] ++;
+            }
             page_table[i][PT_REFERENCE_BIT] = 0;
+        }      
     }
-
     return 1; // Page Fault!
 }
 
