@@ -115,7 +115,19 @@ int aging(int8_t** page_table, int num_pages, int prev_page,
 
 int mfu(int8_t** page_table, int num_pages, int prev_page,
           int fifo_frm, int num_frames, int clock) {
-    return -1;
+    int i, aux, page,j;
+    for(i=0 ; i<num_pages ; i++){
+        if(page_table[i][PT_MAPPED] == 1){
+            page = i;
+            break;
+        }
+    }
+    for(aux=i ; aux<num_pages ; aux++){
+        if(page_table[aux][PT_MAPPED] == 1 && page_table[aux][PT_AGING_COUNTER] > page_table[page][PT_AGING_COUNTER]){
+            page = aux;
+        }           
+    }
+    return page;
 }
 
 int random_page(int8_t** page_table, int num_pages, int prev_page,
@@ -262,6 +274,7 @@ int main(int argc, char **argv) {
             {"second_chance", *second_chance},
             {"nru", *nru},
             {"aging", *aging},
+            {"mfu", *mfu},
             {"random", *random_page}
     };
 
