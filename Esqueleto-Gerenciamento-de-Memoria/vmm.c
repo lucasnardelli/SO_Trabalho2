@@ -44,7 +44,7 @@ typedef struct {
 
 int fifo(int8_t** page_table, int num_pages, int prev_page,
          int fifo_frm, int num_frames, int clock) {
-    int i;
+    int i=0;
     while (i<num_pages){
         if(fifo_frm == page_table[i][PT_FRAMEID]){
             return i;
@@ -63,6 +63,7 @@ int second_chance(int8_t** page_table, int num_pages, int prev_page,
                 return i;
             }else{
                 page_table[i][PT_REFERENCE_BIT] = 0;
+                fifo_frm = (fifo_frm + 1) % num_frames;
             }
         }
         i = (i + 1) % num_pages;
@@ -98,7 +99,7 @@ int nru(int8_t** page_table, int num_pages, int prev_page,
 
 int aging(int8_t** page_table, int num_pages, int prev_page,
           int fifo_frm, int num_frames, int clock) {
-    int i, aux, page,j;
+    int i, aux, page;
     for(i=0 ; i<num_pages ; i++){
         if(page_table[i][PT_MAPPED] == 1){
             page = i;
@@ -115,7 +116,7 @@ int aging(int8_t** page_table, int num_pages, int prev_page,
 
 int mfu(int8_t** page_table, int num_pages, int prev_page,
           int fifo_frm, int num_frames, int clock) {
-    int i, aux, page,j;
+    int i, aux, page;
     for(i=0 ; i<num_pages ; i++){
         if(page_table[i][PT_MAPPED] == 1){
             page = i;
